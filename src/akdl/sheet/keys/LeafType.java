@@ -1,0 +1,17 @@
+package akdl.sheet.keys;
+
+public enum LeafType {
+  NUMERICAL, NUMERICALS,
+  BOOLEAN, BOOLEANS,
+  INTEGER, INTEGERS,
+  LONG, LONGS,
+  DOUBLE, DOUBLES,
+  OBJECT, OBJECTS,
+  DATE, DATES,
+  TIME, TIMES,
+  LITERAL, STRINGS,
+  IDENTIFIER,
+  CHAR,
+  GRAPH,
+  REGEXP;
+}
