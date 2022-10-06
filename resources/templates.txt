@@ -1,0 +1,1635 @@
+PARSER_MAIN================================================
+package %PACK%;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StreamTokenizer;
+
+%IMPORTS%
+
+/**
+ * Code generated using AKDL
+ * @author Dragan Matic
+ *
+ */
+public class %TYPE% extends StreamTokenizer {
+
+  private String msg;
+  private StringBuffer buffer = new StringBuffer();
+
+  // RT declaration
+%RT_DECL%
+
+  public %TYPE%(Reader r) {
+    super(r);
+    setup();
+  }
+
+  private void setup() {
+    eolIsSignificant(false);
+    lowerCaseMode(false);
+    quoteChar('\'');
+    ordinaryChar('\\');
+    ordinaryChar('/');
+    ordinaryChar('.');
+    ordinaryChar('-');
+    ordinaryChar('°');
+    wordChars('_', '_');
+    slashSlashComments(true);
+    slashStarComments(true);
+  }
+
+  public boolean parse() {
+    try {
+      MainParser mp = new MainParser();
+      return mp.parse(this, false) != Boolean.FALSE;
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+
+  public boolean isComplete() {
+    try {
+      int token = nextToken();
+      if (token == TT_EOF) {
+        return true;
+      }
+      pushBack();
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+
+%IS_GRAPH%
+
+  public StringBuffer getRendering() {
+      return buffer;
+  }
+
+  public Boolean errorLog(boolean isFirst) {
+     if (isFirst) {
+      pushBack();
+      return null;
+    }
+    switch (ttype) {
+      case TT_NUMBER:
+        msg = "Error at line " + lineno() + " near " + nval;
+        break;
+      case TT_EOF:
+        msg = "Error: unexpected end of line reached";
+        break;
+      case TT_WORD:
+        msg = "Error at line " + lineno() + " near " + sval;
+        break;
+      default:
+        msg = "Error at line " + lineno() + " near " + (char)ttype;
+        break;
+    }
+    pushBack();
+    return false;
+  }
+
+  public String getError() {
+    return msg;
+  }
+
+  class MainParser extends AParser {
+
+    @Override
+    public StringBuffer getRendering() {
+      return buffer;
+    }
+
+    @Override
+    public Boolean parse(%PARSER% parser, boolean isOptional) throws IOException {
+      Boolean isOk = true;
+      int token;
+
+%CODELINE%%LEVEL%
+      return isOk != Boolean.FALSE;
+    }
+
+%SUBBLOCK%
+  }
+}
+================================================PARSER_MAIN
+
+PARSER_GRAPH===============================================
+  public String collectGraphSentences() throws IOException {
+    StringBuilder sb = new StringBuilder();
+    if (nval == '{') {
+      sb.append("{");
+      while (nval != '}') {
+        int token = nextToken();
+        if (ttype == StreamTokenizer.TT_NUMBER) {
+          sb.append(" " + nval);
+        }
+        else {
+          sb.append(" " + sval);
+        }
+      }
+    }
+    return sb.toString();
+  }
+===============================================PARSER_GRAPH
+
+PARSER_MAIN_ABS============================================
+package %PACK%;
+
+import java.io.IOException;
+
+import %PACK%.%PARSER%;
+
+/**
+ * Code generated using AKDL
+ * @author Dragan Matic
+ *
+ */
+abstract public class AParser {
+
+  abstract public Boolean parse(%PARSER% parser, boolean isOptional)
+  throws IOException;
+
+  abstract public StringBuffer getRendering();
+
+
+  public boolean match(String string, String sval) {
+    return string.equals(sval);
+  }
+
+  public boolean match(char car, int token) {
+    return token == car;
+  }
+}
+============================================PARSER_MAIN_ABS
+
+PARSER_CLASS===============================================
+package %PACK%;
+
+import java.io.IOException;
+
+%IMPORTS%
+
+/**
+ * Code generated using AKDL
+ * @author Dragan Matic
+ *
+ */
+public class %TYPE% extends AParser {
+
+  StringBuffer buffer = new StringBuffer();
+
+  // RT declarations
+%RT_DECL%
+
+  @Override
+  public Boolean parse(%PARSER% parser, boolean isOptional)
+  throws IOException {
+
+    int token = 0;
+    Boolean isOk = true;
+
+%CODELINE%%LEVEL%
+
+    return isOk; 
+  }
+
+  public StringBuffer getRendering() {
+      return buffer;
+  }
+
+%SUBBLOCK%
+}
+===============================================PARSER_CLASS
+
+PARSER_KEY_DECL============================================
+      %TYPE% %NAME%%INDEX% = new %TYPE%();
+============================================PARSER_KEY_DECL
+
+PARSER_REF_SET=============================================
+      %NAME%%INDEX%.set%TYPE%(ref%TYPE%);
+=============================================PARSER_REF_SET
+
+PARSER_KEY_CHECK===========================================
+        Boolean b%NAME%%INDEX% = %NAME%%INDEX%.parse(parser, isOptional);
+
+        if (b%NAME%%INDEX% != Boolean.TRUE) { return parser.errorLog(%BOOL%); }
+        buffer.append( %NAME%%INDEX%.getRendering() + " " );
+        %PARENT_NAME%.set%MNAME%(%NAME%%INDEX%.get%RT_TYPE%());
+
+===========================================PARSER_KEY_CHECK
+
+PARSER_KEY_MATCH===========================================
+    token = parser.nextToken();
+    isOk = match("%NAME%", parser.sval);
+    if (isOk != Boolean.TRUE) { return parser.errorLog(%BOOL%); }
+    buffer.append("%NAME% ");
+    %OPTION%
+
+===========================================PARSER_KEY_MATCH
+
+PARSER_KEY_MATCH01=========================================
+    token = parser.nextToken();
+    isOk = match("%NAME%", parser.sval);
+    if (isOk == Boolean.TRUE) {
+      buffer.append("%NAME% ");
+      %PARENT_NAME%.setIs%RT_TYPE%(true);
+      %RET_TRUE_OPTION%
+    }
+    else {
+      parser.pushBack();
+      isOk = true;
+    }
+=========================================PARSER_KEY_MATCH01
+
+PARSER_GROUP_MATCH01=======================================
+    token = parser.nextToken();
+    isOk = match("%NAME%", parser.sval);
+    if (isOk != Boolean.TRUE) { return parser.errorLog(%BOOL%); }
+    buffer.append("%NAME% ");
+    %PARENT_NAME%.setIs%RT_TYPE%(true);
+
+=======================================PARSER_GROUP_MATCH01
+
+PARSER_PREDEF_MATCH========================================
+    token = parser.nextToken();
+    if (token != StreamTokenizer.TT_WORD) {
+      return parser.errorLog(%BOOL%);
+    }
+    isOk = true;
+    %NAME%.set%TYPE%(%VALUE%);
+    %OPTION%
+    buffer.append( %NAME%.get%TYPE%() + " " );
+
+========================================PARSER_PREDEF_MATCH
+
+PARSER_PREDEF_CHAR_MATCH===================================
+    token = parser.nextToken();
+    if (token == StreamTokenizer.TT_NUMBER && parser.nval >= 0 && parser.nval < 10) {
+      %NAME%.set%TYPE%((char) (48+parser.nval));
+    }
+    else if (parser.sval.length() == 1) {
+      %NAME%.set%TYPE%((char) parser.sval.charAt(0));
+    }
+    else {
+      return parser.errorLog(%BOOL%);
+    }
+    %OPTION%
+    buffer.append( %NAME%.get%TYPE%() + " " );
+
+===================================PARSER_PREDEF_CHAR_MATCH
+
+PARSER_PREDEF_CST_MATCH====================================
+    token = parser.nextToken();
+    if (token != '\"') {
+      return parser.errorLog(%BOOL%);
+    }
+    isOk = true;
+    %NAME%.set%TYPE%(%VALUE%);
+    %OPTION%
+    buffer.append( %NAME%.get%TYPE%() + " " );
+
+====================================PARSER_PREDEF_CST_MATCH
+
+PARSER_PREDEF_REGEXP_MATCH=================================
+    token = parser.nextToken();
+    if (token != '\"' || !parser.sval.matches("%VALUE%")) {
+      return parser.errorLog(%BOOL%);
+    }
+    isOk = true;
+    %NAME%.set%TYPE%(parser.sval);
+    buffer.append( %NAME%.get%TYPE%() + " " );
+
+=================================PARSER_PREDEF_REGEXP_MATCH
+
+PARSER_PREDEF_REGEXP_MATCH01===============================
+    token = parser.nextToken();
+    if (token == -1) { return null;}
+    if (token == '\"') {
+      if (!parser.sval.matches("%VALUE%")) {
+        return parser.errorLog(%BOOL%);
+      }
+      isOk = true;
+      %NAME%.setIs%TYPE%(true);
+      %NAME%.set%TYPE%(parser.sval);
+      buffer.append( %NAME%.get%TYPE%() + " " );
+    }
+    else {
+      parser.pushBack();
+    }
+===============================PARSER_PREDEF_REGEXP_MATCH01
+
+PARSER_PREDEF_MATCH01======================================
+    token = parser.nextToken();
+    if (token == StreamTokenizer.TT_WORD || token == '\"') {
+      %NAME%.set%TYPE%(%VALUE%);
+      %OPTION%
+      buffer.append( %NAME%.get%TYPE%() + " " );
+    }
+    else {
+      parser.pushBack();
+    }
+======================================PARSER_PREDEF_MATCH01
+
+PARSER_PREDEF_GROUP_MATCH01================================
+    token = parser.nextToken();
+    if (token != StreamTokenizer.TT_WORD && token != '\"') { return parser.errorLog(%BOOL%); }
+    %NAME%.set%TYPE%(%VALUE%);
+    %OPTION%
+    buffer.append( %NAME%.get%TYPE%() + " " );
+
+=================================PARSER_PREDEF_GROUP_MATCH01
+
+PARSER_PLUS_WORD===========================================
+    token = parser.nextToken();
+    if (token == StreamTokenizer.TT_WORD) {
+      %PARENT_NAME%.set%TYPE%(parser.sval);
+      buffer.append( %PARENT_NAME%.get%TYPE%() + " " );
+      return true; 
+    }
+    else {
+      parser.pushBack();
+    }
+===========================================PARSER_PLUS_WORD
+
+PARSER_PLUS_CST============================================
+    token = parser.nextToken();
+    if (token == '\"') {
+      %PARENT_NAME%.set%TYPE%(parser.sval);
+      buffer.append( %PARENT_NAME%.get%TYPE%() + " " );
+      return isOk != Boolean.FALSE; 
+    }
+    else {
+      parser.pushBack();
+    }
+============================================PARSER_PLUS_CST
+
+PARSER_PLUS_KEY_MATCH======================================
+    token = parser.nextToken();
+    isOk = match("%NAME%", parser.sval);
+    if (isOk == Boolean.TRUE) {
+      %PARENT_NAME%.setIsString%NAME%(true);
+      %PARENT_NAME%.setString%NAME%(parser.sval);
+      buffer.append("%NAME% ");
+      return true;
+    }
+    else {
+      parser.pushBack();
+      isOk = true;
+    }
+======================================PARSER_PLUS_KEY_MATCH
+
+PARSER_CHAR_MATCH==========================================
+    token = parser.nextToken();
+    isOk = match('%CAR%', token);
+    if (isOk != Boolean.TRUE) {  return parser.errorLog(%BOOL%); }
+    buffer.append( "%CAR% " );
+%OPTION%
+==========================================PARSER_CHAR_MATCH
+
+PARSER_PLUS_CHAR_MATCH=====================================
+    token = parser.nextToken();
+    isOk = match('%CAR%', token);
+    if (isOk == Boolean.TRUE) {
+      buffer.append( "%CAR% " );
+      %PARENT_NAME%.set%MNAME%((char)token);
+      return true;
+    }
+    else {
+      parser.pushBack();
+      isOk = true;
+    }
+=====================================PARSER_PLUS_CHAR_MATCH
+
+PARSER_CHAR_OPTION=========================================
+    %PARENT_NAME%.set%MNAME%((char)token);
+=========================================PARSER_CHAR_OPTION
+
+PARSER_CHAR_MATCH01========================================
+    token = parser.nextToken();
+    isOk = match('%CAR%', token);
+    if (isOk == Boolean.TRUE) {
+      buffer.append( "%CAR% " );
+    }
+    else {
+      parser.pushBack();
+      isOk = true;  // because it's optional
+    }
+========================================PARSER_CHAR_MATCH01
+
+PARSER_RT_DECL_GET=========================================
+  private %PACK%.%TYPE% %NAME% = new %PACK%.%TYPE%();
+
+  public %PACK%.%TYPE% get%TYPE%() {
+    return %NAME%;
+  }
+
+=========================================PARSER_RT_DECL_GET
+
+PARSER_RT_FULL_DECL========================================
+  private %PACK%.%TYPE% %NAME%;
+
+  public %PACK%.%TYPE% get%TYPE%() {
+    return %NAME%;
+  }
+
+  public void set%TYPE%(%PACK%.%TYPE% ref) {
+    %NAME% = ref;
+  }
+
+========================================PARSER_RT_FULL_DECL
+
+PARSER_RT_IDECL_GET========================================
+  private %PACK%.%TYPE% %NAME%;
+
+  public %PACK%.%TYPE% get%TYPE%() {
+    return %NAME%;
+  }
+
+========================================PARSER_RT_IDECL_GET
+
+PARSER_RT_REF_DECL_GET=====================================
+  private %PACK%.%TYPE% ref%TYPE% = %PACK%.%TYPE%.%VARNAME%;
+
+  public %PACK%.%TYPE% get%TYPE%() {
+    return ref%TYPE%;
+  }
+
+=====================================PARSER_RT_REF_DECL_GET
+
+PARSER_AMPERS_DECL=========================================
+        AParser %NAME% = new %TYPE%();
+=========================================PARSER_AMPERS_DECL
+
+PARSER_AMPERS_INT_DECL=====================================
+      int i%INDEX% = 0;
+=====================================PARSER_AMPERS_INT_DECL
+
+PARSER_AMPERS_BOOL_DECL====================================
+      Boolean b%INDEX% = null;
+====================================PARSER_AMPERS_BOOL_DECL
+
+PARSER_AMPERS_KEY==========================================
+          if (%NAME% != null) {
+            b%INDEX% = %NAME%.parse(parser, isOptional);
+            if (b%INDEX% == Boolean.TRUE) {
+              %PARENT_NAME%.set%RT_TYPE%( ((%TYPE%) %NAME%).get%RT_TYPE%() );
+              buffer.append( ((%TYPE%) %NAME%).getRendering()+" " );
+              %NAME% = null;
+              found = true;
+            }
+          }
+========================================PARSER_AMPERS_KEY
+
+PARSER_AMPERS_KEY01========================================
+          if (%NAME% != null) {
+            b%INDEX% = %NAME%.parse(parser, true);
+            if (b%INDEX% == Boolean.FALSE) {
+              return false;
+            }
+            if (b%INDEX% == Boolean.TRUE) {
+              %PARENT_NAME%.set%RT_TYPE%( ((%TYPE%) %NAME%).get%RT_TYPE%() );
+              %PARENT_NAME%.setIs%RT_TYPE%( true );
+              buffer.append( ((%TYPE%) %NAME%).getRendering()+" " );
+              %NAME% = null;
+              found = true;
+            }
+          }
+========================================PARSER_AMPERS_KEY01
+
+PARSER_AMPERS_KEY0N========================================
+          b%INDEX% = %NAME%.parse(parser, true);
+          if (b%INDEX% == Boolean.TRUE) {
+            %PARENT_NAME%.add%RT_TYPE%( ((%TYPE%) %NAME%).get%RT_TYPE%() );
+            buffer.append( ((%TYPE%) %NAME%).getRendering()+" " );
+            found = true;
+          }
+          else if (b%INDEX% == Boolean.FALSE) {
+            b%INDEX% = null;
+            parser.pushBack();
+          }
+========================================PARSER_AMPERS_KEY0N
+
+PARSER_AMPERS_CHAR=========================================
+          if (i%INDEX% == 0) {
+            token = parser.nextToken();
+            b%INDEX% = match('%CAR%', token);
+            if (b%INDEX% == Boolean.TRUE) {
+              buffer.append( "%CAR% " );
+              i%INDEX% = 1;
+              found = true;
+            }
+            else {
+              parser.pushBack();
+            }
+          }
+=========================================PARSER_AMPERS_CHAR
+
+PARSER_AMPERS_CHAR01=======================================
+          if (i%INDEX% == 0) {
+            token = parser.nextToken();
+            b%INDEX% = match('%CAR%', token);
+            if (b%INDEX% == Boolean.TRUE) {
+              %PARENT_NAME%.setIs%MNAME%( true );
+              buffer.append( "%CAR% " );
+              found = true;
+            }
+            else {
+              parser.pushBack();
+            }
+          }
+=======================================PARSER_AMPERS_CHAR01
+
+PARSER_AMPERS_CHAR0N=======================================
+          token = parser.nextToken();
+          b%INDEX% = match('%CAR%', token);
+          if (b%INDEX% == Boolean.TRUE) {
+            %PARENT_NAME%.add%MNAME%(parser.sval.charAt(0));
+            buffer.append( "%CAR% " );
+            found = true;
+          }
+          else {
+            parser.pushBack();
+          }
+=======================================PARSER_AMPERS_CHAR0N
+
+PARSER_AMPERS_STRING=======================================
+          if (i%INDEX% == 0) {
+            token = parser.nextToken();
+            b%INDEX% = match("%NAME%", parser.sval);
+            if (b%INDEX% == Boolean.TRUE) {
+              buffer.append( "%NAME% " );
+              i%INDEX% = 1;
+              found = true;
+            }
+            else {
+              parser.pushBack();
+            }
+          }
+=======================================PARSER_AMPERS_STRING
+
+PARSER_AMPERS_STRING01=====================================
+          if (i%INDEX% == 0) {
+            token = parser.nextToken();
+            b%INDEX% = match("%NAME%", parser.sval);
+            if (b%INDEX% == Boolean.TRUE) {
+              %PARENT_NAME%.setIs%MNAME%( true );
+              buffer.append( "%NAME% " );
+              found = true;
+            }
+            else {
+              parser.pushBack();
+            }
+          }
+=====================================PARSER_AMPERS_STRING01
+
+PARSER_AMPERS_STRING0N=====================================
+          token = parser.nextToken();
+          b%INDEX% = match('%NAME%', token);
+          if (b%INDEX% == Boolean.TRUE) {
+            %PARENT_NAME%.add%MNAME%(parser.sval);
+            buffer.append( "%NAME% " );
+            found = true;
+          }
+          else if (b%INDEX% == Boolean.FALSE) {
+            b%INDEX% = null;
+            parser.pushBack();
+          }
+=====================================PARSER_AMPERS_STRING0N
+
+PARSER_AMPERS_PREDEF=======================================
+          if (i%INDEX% == 0) {
+            token = parser.nextToken();
+            b%INDEX% = token == StreamTokenizer.TT_WORD;
+            if (b%INDEX% == Boolean.TRUE) {
+              %NAME%.set%TYPE%(%VALUE%);
+              buffer.append( %NAME%.get%TYPE%() + " " );
+              i%INDEX% = 1;
+              found = true;
+            }
+            else {
+              parser.pushBack();
+            }
+          }
+=======================================PARSER_AMPERS_PREDEF
+
+PARSER_AMPERS_PREDEF01=====================================
+          if (i%INDEX% == 0) {
+            token = parser.nextToken();
+            b%INDEX% = token == StreamTokenizer.TT_WORD;
+            if (b%INDEX% == Boolean.TRUE) {
+              %NAME%.set%TYPE%(%VALUE%);
+              %PARENT_NAME%.setIs%MNAME%( true );
+              buffer.append( %NAME%.get%TYPE%() + " " );
+              i%INDEX% = 1;
+              found = true;
+            }
+            else {
+              parser.pushBack();
+            }
+          }
+=====================================PARSER_AMPERS_PREDEF01
+
+PARSER_AMPERS_PREDEF0N=====================================
+          token = parser.nextToken();
+          b%INDEX% = token == StreamTokenizer.TT_WORD;
+          if (b%INDEX% == Boolean.TRUE) {
+            %NAME%.add%TYPE%(%VALUE%);
+            buffer.append( %NAME%.get%TYPE%() + " " );
+            found = true;
+          }
+          else if (b%INDEX% == Boolean.FALSE) {
+            b%INDEX% = null;
+            parser.pushBack();
+          }
+=====================================PARSER_AMPERS_PREDEF0N
+
+PARSER_AMPERS_BOOL_TEST====================================
+         && b%INDEX% != Boolean.FALSE
+====================================PARSER_AMPERS_BOOL_TEST
+
+PARSER_AMPERS_SUB_CALL=====================================
+      isOk = ampersAndBlock%INDEX%(parser, isOptional);
+      if (isOk != Boolean.TRUE) {
+        return parser.errorLog(%BOOL%);
+      }
+
+=====================================PARSER_AMPERS_SUB_CALL
+
+PARSER_AMPERS_SUB_METHOD===================================
+
+    private boolean ampersAndBlock%INDEX%(%PARSER% parser, boolean isOptional) throws IOException {
+      int token = 0;
+%BOOL_DECL%
+   
+      try {
+        boolean found = true;
+
+        while (found) {
+%REF_DECL%
+          found = false;
+%REF_BLOCK%
+  
+        }
+      }
+      catch (NullPointerException e) {
+        return false;
+      }
+      catch (RuntimeException e) {
+        return false;
+      }
+      return
+%BOOL_TEST%
+      ; 
+    }
+
+===================================PARSER_AMPERS_SUB_METHOD
+
+PARSER_PLUS_IBLOCK=========================================
+    %TYPE% b%TYPE% = new %TYPE%();
+    isOk = b%TYPE%.parse(parser, isOptional);
+    if (isOk == Boolean.FALSE) {
+      return false;
+    }
+    if (isOk == Boolean.TRUE) {
+      %PARENT_NAME% = b%TYPE%.get%RT_TYPE%();
+      buffer.append( b%TYPE%.getRendering()+" " );
+      return true;
+    }
+
+=========================================PARSER_PLUS_IBLOCK
+
+PARSER_PLUS_BLOCK==========================================
+    %TYPE% b%TYPE% = new %TYPE%();
+    isOk = b%TYPE%.parse(parser, isOptional);
+    if (isOk == Boolean.FALSE) {
+      return false;
+    }
+    if (isOk == Boolean.TRUE) {
+      %PARENT_NAME%.set%TYPE%(b%TYPE%.get%RT_TYPE%());
+      buffer.append( b%TYPE%.getRendering()+" " );
+      return true;
+    }
+
+==========================================PARSER_PLUS_BLOCK
+
+PARSER_PLUS_SUB_CALL=======================================
+    isOk = plusBlock(parser, isOptional);
+    if (isOk == Boolean.FALSE) {
+      return parser.errorLog(false);
+    }
+
+=======================================PARSER_PLUS_SUB_CALL
+
+PARSER_PLUS_SUB_METHOD=====================================
+  private Boolean plusBlock(%PARSER% parser, boolean isOptional) throws IOException {
+    int token = 0;
+    Boolean isOk = true;
+
+%CODELINE%%LEVEL%
+    if (isOk == null) {
+      return isOptional ? null : false;
+    }
+    return isOk ? true : isOptional ? null : false;
+  }
+
+=====================================PARSER_PLUS_SUB_METHOD
+
+PARSER_STAR_BLOCK==========================================
+    %TYPE% %NAME% = new %TYPE%();
+    isOk = %NAME%.parse(parser, true);
+    if (isOk == Boolean.FALSE) {
+      return false;
+    }
+    if (isOk == Boolean.TRUE) {
+      %PARENT_NAME%.add%MNAME%(%NAME%.get%RT_TYPE%());
+      buffer.append( %NAME%.getRendering()+" " );
+    }
+
+==========================================PARSER_STAR_BLOCK
+
+PARSER_STAR_GROUP_BLOCK====================================
+    %TYPE% %NAME% = new %TYPE%();
+    isOk = %NAME%.parse(parser, true);
+    if (isOk != Boolean.TRUE) { return parser.errorLog(%BOOL%); }
+    %PARENT_NAME%.add%MNAME%(%NAME%.get%RT_TYPE%());
+    buffer.append( %NAME%.getRendering()+" " );
+
+====================================PARSER_STAR_GROUP_BLOCK
+
+PARSER_STAR_SUB_CALL=======================================
+      isOk = starBlock%INDEX%(parser, isOptional);
+      if (isOk == Boolean.FALSE) {
+        return false;
+      }
+
+=======================================PARSER_STAR_SUB_CALL
+
+PARSER_STAR_SUB_METHOD=====================================
+  private Boolean starBlock%INDEX%(%PARSER% parser, boolean isOptional) throws IOException {
+    Boolean found = true;
+    while (found == Boolean.TRUE) {
+      found = groupBlock%INDEX%(parser, isOptional);
+    }
+    return found != Boolean.FALSE;
+  }
+
+  private Boolean groupBlock%INDEX%(%PARSER% parser, boolean isOptional) throws IOException {
+    int token = 0;
+    Boolean isOk = true;
+ 
+%CODELINE%%LEVEL%
+    return isOk;
+  }
+
+=====================================PARSER_STAR_SUB_METHOD
+
+PARSER_HUT_BLOCK===========================================
+      isOk = %NAME%%INDEX%.parse(parser, true);
+      if (isOk == Boolean.FALSE) {
+        return false;
+      }
+      if (isOk == Boolean.TRUE) {
+        %PARENT_NAME%.set%MNAME%(%NAME%%INDEX%.get%RT_TYPE%());
+        %PARENT_NAME%.setIs%RT_TYPE%(true);
+        buffer.append( %NAME%%INDEX%.getRendering()+" " );
+      }
+      isOk = true;
+
+===========================================PARSER_HUT_BLOCK
+
+PARSER_HUT_GROUP_BLOCK=====================================
+      isOk = %NAME%%INDEX%.parse(parser, true);
+      if (isOk != Boolean.TRUE) { return parser.errorLog(%BOOL%); }
+      %PARENT_NAME%.set%MNAME%(%NAME%%INDEX%.get%RT_TYPE%());
+      %PARENT_NAME%.setIs%RT_TYPE%(true);
+      buffer.append( %NAME%%INDEX%.getRendering()+" " );
+
+=====================================PARSER_HUT_GROUP_BLOCK
+
+PARSER_HUT_SUB_CALL========================================
+      isOk = hutBlock%INDEX%(parser, true) != Boolean.FALSE;
+      if (!isOk) {
+        return false;
+      }
+
+========================================PARSER_HUT_SUB_CALL
+
+PARSER_HUT_SUB_METHOD======================================
+  private Boolean hutBlock%INDEX%(%PARSER% parser, boolean isOptional) throws IOException {
+    int token = 0;
+    Boolean isOk = true;
+
+ %CODELINE%%LEVEL%
+    return true;
+  }
+
+======================================PARSER_HUT_SUB_METHOD
+
+PARSER_SIMPLE_SUB_CALL=====================================
+    isOk = simpleBlock%INDEX%(parser, isOptional);
+    if (isOk != Boolean.TRUE) {
+      return false;
+    }
+
+=====================================PARSER_SIMPLE_SUB_CALL
+
+PARSER_SIMPLE_SUB_METHOD===================================
+  private boolean simpleBlock%INDEX%(%PARSER% parser, boolean isOptional) throws IOException {
+    int token = 0;
+    Boolean isOk = true;
+
+ %CODELINE%%LEVEL%
+    return isOk != Boolean.FALSE;
+  }
+
+===================================PARSER_SIMPLE_SUB_METHOD
+
+PARSER_ENUM================================================
+    token = parser.nextToken();
+    if (%NAME% == null) {
+      %PACK%%TYPE%[] values = %PACK%%TYPE%.values();
+      for (int i=0; i<values.length; i++) {
+        %PACK%%TYPE% %NAME%Result = values[i];
+        if (match(%NAME%Result.getVal(), parser.sval)) {
+          %NAME% = %NAME%Result;
+          buffer.append( %NAME%.getVal() + " " );
+          return true;
+        }
+      }
+      parser.pushBack();
+      return null;
+    }
+    else {
+      if (match(%NAME%.getVal(), parser.sval)) {
+        buffer.append( %NAME%.getVal() + " " );
+        return true;
+      }
+    }
+    parser.pushBack();
+    isOk = null;
+
+================================================PARSER_ENUM
+
+PARSER_ENUM_CAR============================================
+    token = parser.nextToken();
+    if (%NAME% == null) {
+      %PACK%%TYPE%[] values = %PACK%%TYPE%.values();
+      for (int i=0; i<values.length; i++) {
+        %PACK%%TYPE% %NAME%Result = values[i];
+        if (token == parser.TT_WORD && match(%NAME%Result.getVal(), parser.sval) ||
+            match(%NAME%Result.getVal().charAt(0), token)) {
+          %NAME% = %NAME%Result;
+          buffer.append( %NAME%.getVal() + " " );
+          return true;
+        }
+      }
+      parser.pushBack();
+      return null;
+    }
+    else {
+      if (match(%NAME%.getVal().charAt(0), token)) {
+        buffer.append( %NAME%.getVal() + " " );
+        return true;
+      }
+    }
+    parser.pushBack();
+    isOk = null;
+
+============================================PARSER_ENUM_CAR
+
+RUNTIME_CLASS==============================================
+package %PACK%;
+
+%IMPORTS%
+
+/**
+ * Code generated using AKDL
+ * @author Dragan Matic
+ *
+ */
+public class %TYPE% %EXTEND% implements java.io.Serializable {
+
+  private static final long serialVersionUID = %NR%L;
+
+  //=== Attributes =============================================================
+
+%ATT%
+
+  //=== Constructor ============================================================
+
+  public %TYPE%() {
+  }
+
+  //=== Methods ================================================================
+
+%METHOD%
+
+%IMPLEMENT%
+
+  //=== Acceptors ==============================================================
+
+%ACCEPT%
+
+}
+==============================================RUNTIME_CLASS
+
+RUNTIME_EVALUATOR_EXTEND===================================
+extends %PACK0%.AEvaluator 
+===================================RUNTIME_EVALUATOR_EXTEND
+
+RUNTIME_EVALUATOR_TRAVERSER================================
+  @Override
+  public void traverse() {
+%TRAVERSE%
+  }
+================================RUNTIME_EVALUATOR_TRAVERSER
+
+RUNTIME_TRAVERSE_SIMPLE_CONDITION==========================
+
+    %INDENT%if (is%UTNAME%) {
+  %ITRAVERSE%
+    %INDENT%}
+==========================RUNTIME_TRAVERSE_SIMPLE_CONDITION
+
+RUNTIME_TRAVERSE_ARRAY_CONDITION===========================
+
+    %INDENT%if (has%UTNAME%s()) {
+  %ITRAVERSE%
+    %INDENT%}
+===========================RUNTIME_TRAVERSE_ARRAY_CONDITION
+
+RUNTIME_TRAVERSE_ARRAY=====================================
+    %INDENT%for (int i=0; i<%TNAME%s.size(); i++) {
+  %INDENT%%FTRAVERSE%
+      %INDENT%}
+=====================================RUNTIME_TRAVERSE_ARRAY
+
+RUNTIME_TRAVERSE_CONTENT_SIMPLE============================
+    %INDENT%%TNAME%.traverse();
+============================RUNTIME_TRAVERSE_CONTENT_SIMPLE
+
+RUNTIME_TRAVERSE_UE_CONTENT================================
+    %INDENT%push(%UTNAME%UserExitHandler.getInstance().getValue(this));
+================================RUNTIME_TRAVERSE_UE_CONTENT
+
+RUNTIME_TRAVERSE_CONTENT_PUSH==============================
+    %INDENT%push(%TNAME%);
+==============================RUNTIME_TRAVERSE_CONTENT_PUSH
+
+RUNTIME_TRAVERSE_CONTENT_PUSH_NAME=========================
+    %INDENT%push(%TNAME%.name());
+=========================RUNTIME_TRAVERSE_CONTENT_PUSH_NAME
+
+RUNTIME_TRAVERSE_CONTENT_VIS===============================
+    %INDENT%%RT_TYPE%VisitorImpl vis%TNAME% = new %RT_TYPE%VisitorImpl();
+    %INDENT%for (int i=0; i<%TNAME%s.size(); i++) {
+      %INDENT%%TNAME%s.get(i).accept(vis%TNAME%);
+    %INDENT%}
+===============================RUNTIME_TRAVERSE_CONTENT_VIS
+
+RUNTIME_TRAVERSE_CONTENT_ACCEPT============================
+    %INDENT%%RT_TYPE%VisitorImpl vis%TNAME% = new %RT_TYPE%VisitorImpl();
+    %INDENT%%TNAME%.accept(vis%TNAME%);
+============================RUNTIME_TRAVERSE_CONTENT_ACCEPT
+
+RUNTIME_TRAVERSE_CONTENT_ARRAY_ACCEPT======================
+    %INDENT%%TNAME%s.get(i).accept(vis%TNAME%);
+======================RUNTIME_TRAVERSE_CONTENT_ARRAY_ACCEPT
+
+RUNTIME_CLASS_FOR_INTERFACE================================
+package %PACK%;
+
+%IMPORTS%
+
+/**
+ * Code generated using AKDL
+ * @author Dragan Matic
+ *
+ */
+public class %TYPE% %EXTEND% implements %INTERFACE%, java.io.Serializable {
+
+  private static final long serialVersionUID = %NR%L;
+
+
+  //=== Attributes =============================================================
+
+%ATT%
+
+  //=== Constructor ============================================================
+
+  public %TYPE%() {
+  }
+
+  //=== Methods ================================================================
+
+%METHOD%
+
+%IMPLEMENT%
+
+  //=== Acceptors ==============================================================
+
+%ACCEPT%
+
+}
+================================RUNTIME_CLASS_FOR_INTERFACE
+
+RUNTIME_CLASS_FOR_CLASS====================================
+package %PACK%;
+
+%IMPORTS%
+
+/**
+ * Code generated using AKDL
+ * @author Dragan Matic
+ *
+ */
+public class %TYPE% extends %INTERFACE% implements java.io.Serializable {
+
+  private static final long serialVersionUID = %NR%L;
+
+  //=== Attributes =============================================================
+
+%ATT%
+
+  //=== Constructor ============================================================
+
+  public %TYPE%() {
+  }
+
+  //=== Methods ================================================================
+
+%METHOD%
+
+}
+====================================RUNTIME_CLASS_FOR_CLASS
+
+RUNTIME_INTERFACE_FOR_INTERFACE============================
+package %PACK%;
+
+%IMPORTS%
+
+/**
+ * Code generated using AKDL
+ * @author Dragan Matic
+ *
+ */
+public interface %TYPE% extends %INTERFACE% {
+
+    // acceptor
+    public void accept(%TYPE%Visitor visitor);
+
+}
+============================RUNTIME_INTERFACE_FOR_INTERFACE
+
+RUNTIME_UE_INTERFACE=======================================
+package %PACK%;
+
+/**
+ * Code generated using AKDL
+ * @author Dragan Matic
+ *
+ */
+public interface I%TYPE%UserExit {
+
+  public %RT_TYPE% getValue(Object item);
+
+  public boolean resolve(AEvaluator eval, Object obj);
+
+}
+=======================================RUNTIME_UE_INTERFACE
+
+RUNTIME_CUSTOM_UE_INTERFACE================================
+package %PACK%;
+
+/**
+ * Code generated using AKDL
+ * @author Dragan Matic
+ *
+ */
+public interface I%TYPE%UserExit {
+
+  public void interpret(Object item);
+
+}
+================================RUNTIME_CUSTOM_UE_INTERFACE
+
+RUNTIME_UE_HANDLER=========================================
+package %PACK%;
+
+import %PACK%.AEvaluator;
+
+/**
+ * Code generated using AKDL
+ * @author Dragan Matic
+ *
+ */
+public class %TYPE%UserExitHandler {
+
+  private static %TYPE%UserExitHandler instance = new %TYPE%UserExitHandler();
+
+  private I%TYPE%UserExit userExit;
+
+
+  // PRIVATR CONSTRUCTOR
+  private %TYPE%UserExitHandler() {
+  }
+
+  // instance provider
+  public static %TYPE%UserExitHandler getInstance() {
+    return instance;
+  }
+
+  public void register(I%TYPE%UserExit ue) {
+    this.userExit = ue;
+  }
+
+  public %RT_TYPE% getValue(AEvaluator obj) {
+    return userExit.getValue(obj);
+  }
+
+  public boolean resolve(AEvaluator eval, Object obj) {
+    if (userExit != null) {
+      return userExit.resolve(eval, obj);
+    }
+    return false;
+  }
+}
+=========================================RUNTIME_UE_HANDLER
+
+RUNTIME_NUMERIC_EVALUATOR==================================
+package %PACK%;
+
+import java.util.Stack;
+
+/**
+ * Code generated using AKDL
+ * @author Dragan Matic
+ *
+ */
+abstract public class AEvaluator {
+
+  static private Stack<Object> stack = new Stack<>();
+
+
+  abstract public void traverse();
+
+  public double evaluate() {
+    stack.clear();
+    traverse(); // fills stack
+    Object obj = stack.pop();
+    resolve(obj);
+    return pop();
+  }
+
+  public void push(Object item) {
+    stack.push(item);
+  }
+
+  public boolean resolve(Object obj) {
+    if (%TYPE%UserExitHandler.getInstance().resolve(this, obj)) {
+      return true;
+    }
+    if (obj instanceof String) {
+      switch ((String)obj) {
+        case "ADD":
+          resolveAdd(resolveOperand(), resolveOperand());
+          break;
+        case "SUB":
+          resolveSub(resolveOperand(), resolveOperand());
+          break;
+        case "MUL":
+          resolveMul(resolveOperand(), resolveOperand());
+          break;
+        case "DIV":
+          resolveDiv(resolveOperand(), resolveOperand());
+          break;
+        case "MINUS":
+          resolveMinus(resolveOperand());
+          break;
+        case "POWER":
+          resolvePower(resolveOperand(), resolveOperand());
+          break;
+        case "ROOT":
+          resolveRoot(resolveOperand(), resolveOperand());
+          break;
+
+        default:
+          return false;
+      }
+    }
+    else if (obj instanceof Double) {
+      stack.push(obj);
+    }
+    return true;
+  }
+
+  private void resolveAdd(double num1, double num2) {
+    stack.push((num2 + num1));
+  }
+
+  private void resolveSub(double num1, double num2) {
+    stack.push((num2 - num1));
+  }
+
+  private void resolveMul(double num1, double num2) {
+    stack.push((num2 * num1));
+  }
+
+  private void resolveDiv(double num1, double num2) {
+    stack.push((num2 / num1));
+  }
+
+  private void resolveMinus(double num) {
+    stack.push((-num));
+  }
+
+  private void resolvePower(double num1, double num2) {
+    stack.push(Math.pow(num2, num1));
+  }
+
+  private void resolveRoot(double num1, double num2) {
+    stack.push(Math.pow(num2, 1/num1));
+  }
+
+  public double resolveOperand() {
+    Object obj = stack.pop();
+    if (obj instanceof Double) {
+      return (double) obj;
+    }
+    if (!resolve(obj)) {
+      resolve(stack.pop());
+    }
+    return (double) stack.pop();
+  }
+
+  public double pop() {
+    if (stack.isEmpty()) {
+      return 0;
+    }
+    return (double) stack.pop();
+  }
+
+  public void clear() {
+    stack.clear();
+  }
+}
+==================================RUNTIME_NUMERIC_EVALUATOR
+
+RUNTIME_CUSTOM_EVALUATOR===================================
+package %PACK%;
+
+import java.util.Stack;
+
+/**
+ * Code generated using AKDL
+ * @author Dragan Matic
+ *
+ */
+abstract public class AEvaluator {
+
+  static private Stack<Object> stack = new Stack<>();
+
+  public static Stack<Object> getStack() {
+    return stack;
+  }
+
+  abstract public void traverse();
+
+  public void evaluate() {
+    clear();
+    traverse();
+    %TYPE%UserExitHandler.getInstance().interpret(this);
+  }
+
+  public void push(Object item) {
+    stack.push(item);
+  }
+
+  public void clear() {
+    stack.clear();
+  }
+}
+===================================RUNTIME_CUSTOM_EVALUATOR
+
+RUNTIME_LOGIC_EVALUATOR====================================
+package %PACK%;
+
+import java.util.Stack;
+
+/**
+ * Code generated using AKDL
+ * @author Dragan Matic
+ *
+ */
+abstract public class AEvaluator {
+
+  static private Stack<Object> stack = new Stack<>();
+
+  abstract public void traverse();
+
+  public boolean evaluate() {
+    stack.clear();
+    traverse(); // fills stack
+    Object obj = stack.pop();
+    resolve(obj);
+    return pop();
+  }
+
+  public void push(Object item) {
+    stack.push(item);
+  }
+
+  public boolean resolve(Object obj) {
+    if (%TYPE%UserExitHandler.getInstance().resolve(this, obj)) {
+      return true;
+    }
+    if (obj instanceof String) {
+      switch ((String)obj) {
+        case "AND":
+          resolveAnd(resolveOperand(), resolveOperand());
+          break;
+        case "NAND":
+          resolveNand(resolveOperand(), resolveOperand());
+          break;
+        case "OR":
+          resolveOr(resolveOperand(), resolveOperand());
+          break;
+        case "NOR":
+          resolveNor(resolveOperand(), resolveOperand());
+          break;
+        case "XOR":
+          resolveXor(resolveOperand(), resolveOperand());
+          break;
+        case "XNOR":
+          resolveXnor(resolveOperand(), resolveOperand());
+          break;
+        case "NOT":
+          resolveNot(resolveOperand());
+          break;
+
+        default:
+          return false;
+      }
+    }
+    else if (obj instanceof Boolean) {
+      stack.push(obj);
+    }
+    return true;
+  }
+
+  private void resolveAnd(boolean a, boolean b) {
+    stack.push((b && a));
+  }
+
+  private void resolveNand(boolean a, boolean b) {
+    stack.push((!(b && a)));
+  }
+
+  private void resolveOr(boolean a, boolean b) {
+    stack.push((b || a));
+  }
+
+  private void resolveNor(boolean a, boolean b) {
+    stack.push((!(b || a)));
+  }
+
+  private void resolveXor(boolean a, boolean b) {
+    stack.push(!(b && a || !a));
+  }
+
+  private void resolveXnor(boolean a, boolean b) {
+    stack.push(b && a || !a);
+  }
+
+  private void resolveNot(boolean num) {
+    stack.push((!num));
+  }
+
+  public boolean resolveOperand() {
+    Object obj = stack.pop();
+    if (obj instanceof Boolean) {
+      return (boolean) obj;
+    }
+    if (!resolve(obj)) {
+      resolve(stack.pop());
+    }
+    return (boolean) stack.pop();
+  }
+
+  public boolean pop() {
+    if (stack.isEmpty()) {
+      return false;
+    }
+    return (boolean) stack.pop();
+  }
+
+  public void clear() {
+    stack.clear();
+  }
+}
+====================================RUNTIME_LOGIC_EVALUATOR
+
+RUNTIME_CUSTOM_UE_HANDLER==================================
+package %PACK%;
+
+public class %TYPE%UserExitHandler {
+
+  private static %TYPE%UserExitHandler instance = new %TYPE%UserExitHandler();
+
+  private I%TYPE%UserExit userExit;
+
+  private %TYPE%UserExitHandler() {
+  }
+
+  public static %TYPE%UserExitHandler getInstance() {
+    return instance;
+  }
+
+  public void register(I%TYPE%UserExit ue) {
+    this.userExit = ue;
+  }
+
+  public void interpret(Object item) {
+    if (userExit != null) {
+      userExit.interpret(item);
+    }
+  }
+}
+==================================RUNTIME_CUSTOM_UE_HANDLER
+
+RUNTIME_ENUM===============================================
+package %PACK%;
+
+/**
+ * Code generated using AKDL
+ * @author Dragan Matic
+ *
+ */
+public enum %TYPE% {
+
+  //=== Attributes =============================================================
+
+%ATT%;
+
+    String val;
+
+    private %TYPE%(String val) {
+      this.val=val;
+    }
+
+  //=== Methods ================================================================
+
+    public String getVal(){
+      return val;
+    }
+
+    public String toString(){
+      return name() + " = " + val;
+    }
+}
+===============================================RUNTIME_ENUM
+
+RUNTIME_INTERFACE==========================================
+package %PACK%;
+
+/**
+ * Code generated using AKDL
+ * @author Dragan Matic
+ *
+ */
+public interface %TYPE% {
+
+    // acceptor
+    public void accept(%TYPE%Visitor visitor);
+
+}
+==========================================RUNTIME_INTERFACE
+
+RUNTIME_VISITOR============================================
+package %PACK%;
+
+%IMPORTS%
+
+/**
+ * Code generated using AKDL
+ * @author Dragan Matic
+ *
+ */
+public interface %TYPE%Visitor {
+
+   //=== Methods ================================================================
+
+%METHOD_DECL%
+
+}
+============================================RUNTIME_VISITOR
+
+RUNTIME_VISITOR_IMPL=======================================
+package %PACK%;
+
+%IMPORTS%
+
+/**
+ * Code generated using AKDL
+ * @author Dragan Matic
+ *
+ */
+public class %TYPE%VisitorImpl implements %TYPE%Visitor {
+
+   //=== Methods ================================================================
+
+%METHOD_DECL%
+
+}
+=========================================RUNTIME_VISITOR_IMPL
+
+RUNTIME_VISITOR_METHOD=======================================
+
+  @Override
+  public void visit%TYPE%(%RT_TYPE% x) {
+    x.traverse();
+  }
+=======================================RUNTIME_VISITOR_METHOD
+
+RUNTIME_ATT_ENUM_LINE======================================
+    %ENUM_A%("%ENUM_B%"),
+======================================RUNTIME_ATT_ENUM_LINE
+
+RUNTIME_ATT_BOOL===========================================
+  private boolean is%RT_TYPE%;
+===========================================RUNTIME_ATT_BOOL
+
+RUNTIME_ATT_SIMPLE=========================================
+  %TRANSIENT%private %PACK%%TYPE% %NAME%;
+=========================================RUNTIME_ATT_SIMPLE
+
+RUNTIME_ATT_ARRAY==========================================
+  %TRANSIENT%private java.util.ArrayList<%PACK%%TYPE%> %NAME%s = new java.util.ArrayList<%PACK%%TYPE%>();
+==========================================RUNTIME_ATT_ARRAY
+
+RUNTIME_ACC_BOOL===========================================
+  public boolean is%RT_TYPE%() {
+    return is%RT_TYPE%;
+  }
+
+  public void setIs%RT_TYPE%(boolean x) {
+    this.is%RT_TYPE% = x;
+  }
+
+  //----------------------------------------------------------------------------
+
+===========================================RUNTIME_ACC_BOOL
+
+RUNTIME_ACC_SIMPLE=========================================
+  public %PACK%%TYPE% get%MNAME%() {
+    return %NAME%;
+  }
+
+  public void set%MNAME%(%PACK%%TYPE% x) {
+    this.%NAME% = x;
+  }
+
+  //----------------------------------------------------------------------------
+
+=========================================RUNTIME_ACC_SIMPLE
+
+RUNTIME_ACC_ARRAY==========================================
+  public boolean has%RT_TYPE%s() {
+    return %NAME%s != null && !%NAME%s.isEmpty();
+  }
+
+  public java.util.ArrayList<%PACK%%TYPE%> get%RT_TYPE%s() {
+    return %NAME%s;
+  }
+
+  public void set%RT_TYPE%s(java.util.ArrayList<%PACK%%TYPE%> x) {
+    %NAME%s = x;
+  }
+
+  public void add%RT_TYPE%(%PACK%%TYPE% x) {
+    %NAME%s.add( x );
+  }
+
+  public void remove%RT_TYPE%(%PACK%%TYPE% x) {
+    %NAME%s.remove( x );
+  }
+
+  //----------------------------------------------------------------------------
+
+==========================================RUNTIME_ACC_ARRAY
+
+RUNTIME_METHOD_DEC=========================================
+   public void visit%TYPE%(%RT_TYPE% x);
+=========================================RUNTIME_METHOD_DEC
+
+RUNTIME_ACCEPT=============================================
+  public void accept(%PARENT_TYPE%Visitor visitor) {
+    visitor.visit%TYPE%(this);
+  }
+
+=============================================RUNTIME_ACCEPT
